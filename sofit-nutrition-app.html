@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f1ea;
+    --card:#fffdf8;
+    --ink:#23211c;
+    --muted:#8a8478;
+    --line:#e4dfd3;
+    --accent:#3f6b54;
+    --accent-soft:#e7efe8;
+    --shadow:0 1px 2px rgba(35,33,28,.04),0 8px 30px rgba(35,33,28,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Outfit',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    background-image:radial-gradient(circle at 20% 0%,rgba(63,107,84,.05),transparent 45%);
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+  .eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:14px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(34px,6vw,52px);line-height:1.05;letter-spacing:-.02em;margin-bottom:14px}
+  .lede{color:var(--muted);font-size:18px;max-width:48ch;margin-bottom:40px}
+  /* goal cards */
+  .goals{display:grid;gap:14px}
+  .goal{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:22px 24px;cursor:pointer;text-align:left;font-family:inherit;
+    transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+    display:flex;align-items:center;gap:18px;box-shadow:var(--shadow);
+  }
+  .goal:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 12px 36px rgba(35,33,28,.1)}
+  .goal .ico{font-size:26px;width:46px;height:46px;flex:none;display:grid;place-items:center;background:var(--accent-soft);border-radius:12px}
+  .goal .t{font-family:'Fraunces',serif;font-size:21px;font-weight:500}
+  .goal .d{font-size:14.5px;color:var(--muted)}
+  /* plan view */
+  .plan{display:none;animation:fade .4s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .back{background:none;border:none;color:var(--accent);font-family:inherit;font-size:15px;cursor:pointer;font-weight:500;padding:6px 0;margin-bottom:20px;display:inline-flex;gap:6px;align-items:center}
+  .back:hover{text-decoration:underline}
+  .section{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:30px 30px 34px;box-shadow:var(--shadow);margin-bottom:24px}
+  .section h2{font-family:'Fraunces',serif;font-weight:500;font-size:26px;margin-bottom:6px;letter-spacing:-.01em}
+  .section .sub{color:var(--muted);font-size:15px;margin-bottom:22px}
+  .day{border-top:1px solid var(--line);padding:18px 0}
+  .day:first-of-type{border-top:none;padding-top:6px}
+  .day h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:12px}
+  .ex{display:grid;grid-template-columns:1fr auto;gap:4px 16px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .ex:last-child{border-bottom:none}
+  .ex .nm{font-weight:500}
+  .ex .rx{color:var(--accent);font-weight:500;font-size:14.5px;white-space:nowrap;align-self:start}
+  .ex .how{grid-column:1/-1;font-size:14px;color:var(--muted)}
+  /* nutrition */
+  .grp{margin-bottom:20px}
+  .grp:last-child{margin-bottom:0}
+  .grp h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+  .grp ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .grp li{position:relative;padding-left:20px;font-size:15.5px}
+  .grp li::before{content:"";position:absolute;left:2px;top:9px;width:7px;height:7px;border:1.5px solid var(--accent);border-radius:2px}
+  .meals{display:grid;gap:12px}
+  .meal{display:flex;gap:12px;font-size:15px}
+  .meal b{font-family:'Fraunces',serif;font-weight:500;color:var(--accent);min-width:78px;flex:none}
+  .note{font-size:13.5px;color:var(--muted);background:var(--accent-soft);border-radius:12px;padding:14px 16px;margin-top:8px;line-height:1.5}
+  @media(max-width:560px){.grp ul{grid-template-columns:1fr}.wrap{padding:34px 18px 60px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="picker">
+    <div class="eyebrow">Personal Plan</div>
+    <h1>What's your one goal?</h1>
+    <p class="lede">Pick a single focus. You'll get an easy weekly workout and a simple HEB shopping list — no beef or pork.</p>
+    <div class="goals" id="goals"></div>
+  </div>
+
+  <div class="plan" id="plan">
+    <button class="back" onclick="reset()">← Choose a different goal</button>
+    <div class="eyebrow" id="planEyebrow"></div>
+    <h1 id="planTitle" style="margin-bottom:24px"></h1>
+
+    <div class="streak section">
+      <div class="streak-top">
+        <div>
+          <div class="streak-num"><span id="streakCount">0</span><span class="flame" id="flame">🔥</span></div>
+          <div class="streak-label" id="streakLabel">day streak — let's start one</div>
+        </div>
+        <button class="done-btn" id="doneBtn" onclick="markToday()">Mark today done</button>
+      </div>
+      <div class="week-strip" id="weekStrip"></div>
+    </div>
+
+    <div class="section" id="workout"></div>
+    <div class="section" id="nutrition"></div>
+  </div>
+
+</div>
+
+<script>
+const PLANS = {
+  strength:{
+    icon:"💪", title:"Build Strength", short:"Strength",
+    eyebrow:"Strong & capable",
+    sub:"3 days a week. Rest a day between sessions. Bone and muscle health matter most after 45 — this keeps you strong.",
+    workout:[
+      {day:"Day 1 — Full Body",ex:[
+        {nm:"Bodyweight Squats",rx:"3 × 10",how:"Stand tall, sit back like into a chair, knees over toes, stand up."},
+        {nm:"Wall or Knee Push-ups",rx:"3 × 8",how:"Hands on wall or knees on floor; lower chest, push back up."},
+        {nm:"Glute Bridges",rx:"3 × 12",how:"Lie on back, knees bent, lift hips, squeeze, lower slowly."},
+        {nm:"Bird-Dog",rx:"3 × 8/side",how:"On hands & knees, extend opposite arm and leg, hold 2 sec."},
+      ]},
+      {day:"Day 2 — Lower & Core",ex:[
+        {nm:"Step-ups (stair/box)",rx:"3 × 10/leg",how:"Step up onto a stair, drive through heel, step down with control."},
+        {nm:"Standing Calf Raises",rx:"3 × 15",how:"Rise onto toes, pause, lower slowly. Hold a counter for balance."},
+        {nm:"Plank",rx:"3 × 20 sec",how:"Forearms down, body in a straight line, squeeze belly."},
+        {nm:"Side-Lying Leg Lifts",rx:"3 × 12/side",how:"Lie on side, lift top leg up and down with control."},
+      ]},
+      {day:"Day 3 — Upper & Pull",ex:[
+        {nm:"Dumbbell/Water-jug Rows",rx:"3 × 10/arm",how:"Hinge forward, pull weight to ribs, lower slowly."},
+        {nm:"Overhead Press",rx:"3 × 10",how:"Press light dumbbells (or cans) straight overhead, lower."},
+        {nm:"Bicep Curls",rx:"3 × 12",how:"Curl weights up to shoulders, lower slowly."},
+        {nm:"Dead Bug",rx:"3 × 8/side",how:"On back, lower opposite arm & leg, return. Keep low back down."},
+      ]},
+    ]
+  },
+  cardio:{
+    icon:"🫀", title:"Improve Cardio", short:"Cardio",
+    eyebrow:"Energy & endurance",
+    sub:"4 days a week. Mix easy and brisk efforts. Talk-test: brisk = you can talk but not sing.",
+    workout:[
+      {day:"Day 1 — Brisk Walk",ex:[
+        {nm:"Walk",rx:"30 min",how:"Steady brisk pace. Add a slight incline or hill if you can."},
+      ]},
+      {day:"Day 2 — Intervals",ex:[
+        {nm:"Warm-up walk",rx:"5 min",how:"Easy, loosen up."},
+        {nm:"Fast / Easy intervals",rx:"8 rounds",how:"1 min brisk (almost jogging), 1 min easy. Repeat 8 times."},
+        {nm:"Cool-down walk",rx:"5 min",how:"Slow it down, let your breath settle."},
+      ]},
+      {day:"Day 3 — Steady Cardio",ex:[
+        {nm:"Walk, cycle, or swim",rx:"35 min",how:"Comfortable continuous pace you can hold the whole time."},
+      ]},
+      {day:"Day 4 — Walk + Strength touch",ex:[
+        {nm:"Brisk walk",rx:"20 min",how:"Steady pace."},
+        {nm:"Bodyweight Squats",rx:"2 × 12",how:"Sit back and stand; keeps legs strong for cardio."},
+        {nm:"Glute Bridges",rx:"2 × 12",how:"Lift hips, squeeze, lower slowly."},
+      ]},
+    ]
+  },
+  flexibility:{
+    icon:"🧘", title:"Increase Flexibility", short:"Flexibility",
+    eyebrow:"Mobile & loose",
+    sub:"Daily if you like — it's gentle. Move slowly, never bounce, breathe into each stretch. Hold 30 sec each.",
+    workout:[
+      {day:"Morning — Wake Up",ex:[
+        {nm:"Cat-Cow",rx:"8 slow",how:"On hands & knees, arch then round your back with your breath."},
+        {nm:"Standing Forward Fold",rx:"30 sec",how:"Hinge at hips, let arms and head hang. Soft knees."},
+        {nm:"Neck & Shoulder Rolls",rx:"5 each way",how:"Slow circles to release tension."},
+      ]},
+      {day:"Anytime — Lower Body",ex:[
+        {nm:"Seated Hamstring Stretch",rx:"30 sec/leg",how:"Sit, reach toward one foot, keep back long."},
+        {nm:"Figure-4 Hip Stretch",rx:"30 sec/side",how:"Lie down, ankle on opposite knee, draw thigh toward you."},
+        {nm:"Standing Quad Stretch",rx:"30 sec/side",how:"Hold a wall, grab one ankle behind you, knees together."},
+      ]},
+      {day:"Evening — Unwind",ex:[
+        {nm:"Child's Pose",rx:"60 sec",how:"Kneel, sit hips back, reach arms forward, relax."},
+        {nm:"Seated Spinal Twist",rx:"30 sec/side",how:"Sit tall, twist gently, look over your shoulder."},
+        {nm:"Chest Opener (doorway)",rx:"30 sec",how:"Forearm on door frame, step forward to feel the stretch."},
+      ]},
+    ]
+  },
+  health:{
+    icon:"🌿", title:"General Health", short:"General health",
+    eyebrow:"Balanced & well",
+    sub:"4 days a week, a little of everything — strength, movement, and stretching. Sustainable and easy to keep up.",
+    workout:[
+      {day:"Day 1 — Strength",ex:[
+        {nm:"Bodyweight Squats",rx:"3 × 12",how:"Sit back like into a chair, stand tall."},
+        {nm:"Knee or Wall Push-ups",rx:"3 × 10",how:"Lower chest, push back up with control."},
+        {nm:"Glute Bridges",rx:"3 × 12",how:"Lift hips, squeeze, lower slowly."},
+      ]},
+      {day:"Day 2 — Cardio",ex:[
+        {nm:"Brisk Walk",rx:"30 min",how:"Pace where you can talk but not sing."},
+      ]},
+      {day:"Day 3 — Strength + Core",ex:[
+        {nm:"Step-ups",rx:"3 × 10/leg",how:"Step onto a stair, drive through the heel."},
+        {nm:"Overhead Press",rx:"3 × 10",how:"Press light weights overhead, lower slowly."},
+        {nm:"Plank",rx:"3 × 20 sec",how:"Straight line head to heels, squeeze belly."},
+      ]},
+      {day:"Day 4 — Walk + Stretch",ex:[
+        {nm:"Easy Walk",rx:"25 min",how:"Relaxed, enjoyable pace."},
+        {nm:"Full-body Stretch",rx:"10 min",how:"Hamstrings, hips, chest, and shoulders — hold 30 sec each."},
+      ]},
+    ]
+  },
+  weightloss:{
+    icon:"🍃", title:"Weight Loss", short:"Weight loss",
+    eyebrow:"Lean & energized",
+    sub:"4 days a week: cardio to burn, strength to keep muscle. The nutrition list does most of the work here — protein and veg keep you full.",
+    workout:[
+      {day:"Day 1 — Cardio + Core",ex:[
+        {nm:"Brisk Walk",rx:"35 min",how:"Steady brisk pace; add hills if you can."},
+        {nm:"Plank",rx:"3 × 25 sec",how:"Straight line, squeeze belly."},
+      ]},
+      {day:"Day 2 — Full-Body Strength",ex:[
+        {nm:"Squats",rx:"3 × 12",how:"Sit back and stand; add a weight to make it harder."},
+        {nm:"Rows (jug/dumbbell)",rx:"3 × 10/arm",how:"Hinge, pull to ribs, lower slowly."},
+        {nm:"Glute Bridges",rx:"3 × 15",how:"Lift hips, squeeze, lower."},
+      ]},
+      {day:"Day 3 — Intervals",ex:[
+        {nm:"Warm-up walk",rx:"5 min",how:"Easy pace."},
+        {nm:"Brisk / Easy intervals",rx:"10 rounds",how:"1 min fast, 1 min easy. Repeat 10 times."},
+        {nm:"Cool-down",rx:"5 min",how:"Slow walk to finish."},
+      ]},
+      {day:"Day 4 — Strength + Walk",ex:[
+        {nm:"Step-ups",rx:"3 × 12/leg",how:"Step up, drive through heel."},
+        {nm:"Overhead Press",rx:"3 × 10",how:"Press light weights overhead."},
+        {nm:"Easy Walk",rx:"20 min",how:"Relaxed pace to finish."},
+      ]},
+    ]
+  }
+};
+
+// Nutrition — shared base, with per-goal emphasis. No beef, no pork.
+const NUTRITION = {
+  strength:{
+    sub:"Protein-forward to build and hold muscle. Eat protein at each meal.",
+    groups:{
+      "Produce":["Spinach","Sweet potatoes","Broccoli","Bell peppers","Bananas","Avocados","Berries"],
+      "Meat & Seafood":["Chicken breast","Ground turkey","Salmon fillets","Tilapia"],
+      "Dairy & Eggs":["Eggs (large)","Greek yogurt, plain","Cottage cheese","Milk or fortified soy milk"],
+      "Pantry":["Old-fashioned oats","Brown rice","Quinoa","Black beans","Lentils","Almonds","Peanut butter","Olive oil"]
+    },
+    meals:[
+      ["Breakfast","Greek yogurt + berries + oats + a spoon of peanut butter"],
+      ["Lunch","Chicken + brown rice + broccoli, olive oil drizzle"],
+      ["Dinner","Salmon + sweet potato + spinach"],
+      ["Snack","Cottage cheese + banana, or a handful of almonds"]
+    ],
+    note:"Aim for a palm-sized protein at each meal. Protein after workouts helps muscle repair."
+  },
+  cardio:{
+    sub:"Steady energy from whole carbs, plus enough protein to recover.",
+    groups:{
+      "Produce":["Bananas","Oranges","Berries","Spinach","Carrots","Bell peppers","Sweet potatoes"],
+      "Meat & Seafood":["Chicken breast","Tilapia","Salmon fillets"],
+      "Dairy & Eggs":["Eggs (large)","Greek yogurt, plain","Milk or fortified soy milk"],
+      "Pantry":["Old-fashioned oats","Brown rice","Whole-grain bread","Black beans","Almonds","Honey","Olive oil"]
+    },
+    meals:[
+      ["Breakfast","Oatmeal + banana + honey + a few almonds"],
+      ["Lunch","Chicken + brown rice + carrots and peppers"],
+      ["Dinner","Tilapia + sweet potato + spinach"],
+      ["Snack","Greek yogurt + berries, or fruit before a workout"]
+    ],
+    note:"Eat a small carb snack (banana, toast) about an hour before longer cardio for energy."
+  },
+  flexibility:{
+    sub:"Anti-inflammatory whole foods that support joints and recovery.",
+    groups:{
+      "Produce":["Spinach","Kale","Broccoli","Berries","Oranges","Avocados","Ginger","Sweet potatoes"],
+      "Meat & Seafood":["Salmon fillets","Chicken breast","Sardines"],
+      "Dairy & Eggs":["Eggs (large)","Greek yogurt, plain"],
+      "Pantry":["Walnuts","Chia seeds","Olive oil","Quinoa","Lentils","Green tea","Turmeric"]
+    },
+    meals:[
+      ["Breakfast","Greek yogurt + berries + chia seeds + walnuts"],
+      ["Lunch","Salmon + quinoa + kale and avocado"],
+      ["Dinner","Chicken + sweet potato + broccoli"],
+      ["Snack","Orange + a small handful of walnuts; green tea"]
+    ],
+    note:"Stay well hydrated — muscles and joints stretch better when you're not dehydrated."
+  },
+  health:{
+    sub:"A simple, balanced mix: protein, plenty of veg, whole grains, healthy fats.",
+    groups:{
+      "Produce":["Spinach","Broccoli","Bell peppers","Carrots","Tomatoes","Bananas","Berries","Avocados"],
+      "Meat & Seafood":["Chicken breast","Salmon fillets","Tilapia","Ground turkey"],
+      "Dairy & Eggs":["Eggs (large)","Greek yogurt, plain","Milk or fortified soy milk"],
+      "Pantry":["Old-fashioned oats","Brown rice","Quinoa","Black beans","Lentils","Almonds","Olive oil"]
+    },
+    meals:[
+      ["Breakfast","Eggs + spinach + whole-grain toast, or yogurt + oats + berries"],
+      ["Lunch","Chicken + quinoa + mixed veg"],
+      ["Dinner","Salmon or turkey + brown rice + broccoli"],
+      ["Snack","Fruit + almonds, or yogurt"]
+    ],
+    note:"Fill half your plate with vegetables, a quarter protein, a quarter whole grains."
+  },
+  weightloss:{
+    sub:"High protein + high fiber to stay full on fewer calories. Lean proteins and lots of veg.",
+    groups:{
+      "Produce":["Spinach","Broccoli","Cauliflower","Zucchini","Bell peppers","Cucumber","Tomatoes","Berries","Lemons"],
+      "Meat & Seafood":["Chicken breast","Ground turkey (lean)","Tilapia","Shrimp"],
+      "Dairy & Eggs":["Eggs (large)","Greek yogurt, plain nonfat","Cottage cheese, low-fat"],
+      "Pantry":["Lentils","Black beans","Quinoa","Old-fashioned oats","Almonds","Olive oil (small amount)"]
+    },
+    meals:[
+      ["Breakfast","Eggs + spinach, or Greek yogurt + berries"],
+      ["Lunch","Big salad + grilled chicken + lemon-olive oil"],
+      ["Dinner","Tilapia or shrimp + roasted broccoli & zucchini"],
+      ["Snack","Cottage cheese + cucumber, or a small handful of almonds"]
+    ],
+    note:"Protein + veg at every meal keeps you full. Keep starchy carbs smaller; drink water before meals."
+  }
+};
+
+const goalsEl = document.getElementById('goals');
+Object.entries(PLANS).forEach(([key,p])=>{
+  const b=document.createElement('button');
+  b.className='goal';
+  b.onclick=()=>show(key);
+  b.innerHTML=`<span class="ico">${p.icon}</span><span><span class="t">${p.title}</span><br><span class="d">${p.eyebrow}</span></span>`;
+  goalsEl.appendChild(b);
+});
+
+function show(key){
+  const p=PLANS[key], n=NUTRITION[key];
+  document.getElementById('planEyebrow').textContent=p.eyebrow;
+  document.getElementById('planTitle').textContent=p.title;
+
+  // workout
+  let w=`<h2>Weekly Workout</h2><p class="sub">${p.sub}</p>`;
+  p.workout.forEach(d=>{
+    w+=`<div class="day"><h3>${d.day}</h3>`;
+    d.ex.forEach(e=>{
+      w+=`<div class="ex"><span class="nm">${e.nm}</span><span class="rx">${e.rx}</span><span class="how">${e.how}</span></div>`;
+    });
+    w+=`</div>`;
+  });
+  document.getElementById('workout').innerHTML=w;
+
+  // nutrition
+  let nh=`<h2>HEB Shopping List</h2><p class="sub">${n.sub} No beef or pork.</p>`;
+  Object.entries(n.groups).forEach(([dept,items])=>{
+    nh+=`<div class="grp"><h3>${dept}</h3><ul>`;
+    items.forEach(i=>nh+=`<li>${i}</li>`);
+    nh+=`</ul></div>`;
+  });
+  nh+=`<div class="grp"><h3>Simple Meal Ideas</h3><div class="meals">`;
+  n.meals.forEach(m=>nh+=`<div class="meal"><b>${m[0]}</b><span>${m[1]}</span></div>`);
+  nh+=`</div></div><div class="note">${n.note}</div>`;
+  document.getElementById('nutrition').innerHTML=nh;
+
+  document.getElementById('picker').style.display='none';
+  document.getElementById('plan').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function reset(){
+  document.getElementById('plan').style.display='none';
+  document.getElementById('picker').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

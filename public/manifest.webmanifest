@@ -1,0 +1,17 @@
+{
+  "name": "sofit",
+  "short_name": "sofit",
+  "description": "A personal fitness and nutrition plan.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f1ea",
+  "theme_color": "#3f6b54",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
