@@ -1,5 +1,6 @@
 import { bmiNote, type Profile } from "../lib/profile";
 import { goalOrder, PLANS, type GoalKey } from "../lib/plans";
+import { BrandLogo } from "./BrandLogo";
 
 type GoalPickerProps = {
   profile: Profile;
@@ -12,7 +13,7 @@ export function GoalPicker({ profile, onPick, onEditProfile, savingGoal }: GoalP
   return (
     <main className="app-shell">
       <header className="topbar">
-        <span className="brand">sofit</span>
+        <BrandLogo compact />
         <button className="link-btn" onClick={onEditProfile}>
           Edit details
         </button>

@@ -3,6 +3,7 @@ import type { PersonalPlan } from "../lib/personalPlan";
 import { bmiNote, type Profile } from "../lib/profile";
 import { PLANS, type GoalKey } from "../lib/plans";
 import { calculateBestStreak, calculateCurrentStreak, getTodayString, recentDays } from "../lib/streaks";
+import { BrandLogo } from "./BrandLogo";
 
 type PlanScreenProps = {
   profile: Profile;
@@ -40,7 +41,7 @@ export function PlanScreen({
   return (
     <main className="app-shell plan-shell">
       <header className="topbar">
-        <span className="brand">sofit</span>
+        <BrandLogo compact />
         <div className="top-actions">
           <button className="link-btn" onClick={onEditProfile}>
             Settings

@@ -1,8 +1,10 @@
+import { BrandLogo } from "./BrandLogo";
+
 export function SetupRequired() {
   return (
     <main className="app-shell center-shell">
       <section className="panel setup-panel">
-        <p className="eyebrow">sofit setup</p>
+        <BrandLogo label="sofit setup" />
         <h1>Firebase config needed</h1>
         <p className="lede">
           Add your Firebase web app values to a local <code>.env</code> file using <code>.env.example</code> as the template.

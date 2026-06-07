@@ -8,6 +8,12 @@
   "theme_color": "#3f6b54",
   "icons": [
     {
+      "src": "/sofit_logo.png",
+      "sizes": "2442x1728",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",

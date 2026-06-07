@@ -1,5 +1,6 @@
 import { bmiNote, type Profile } from "../lib/profile";
 import { PLANS, type GoalKey } from "../lib/plans";
+import { BrandLogo } from "./BrandLogo";
 
 type GeneratePlanScreenProps = {
   profile: Profile;
@@ -25,10 +26,12 @@ export function GeneratePlanScreen({
   return (
     <main className="app-shell center-shell">
       <section className="panel generate-panel">
-        <button className="back-btn" onClick={onChangeGoal}>
-          Choose a different goal
-        </button>
-        <p className="eyebrow">Personalized plan</p>
+        <div className="generate-top">
+          <button className="back-btn" onClick={onChangeGoal}>
+            Choose a different goal
+          </button>
+        </div>
+        <BrandLogo compact label="Personalized plan" />
         <h1>{busy ? "Building your week" : "Create your weekly plan"}</h1>
         <p className="lede">
           sofit will use your profile and {plan.title.toLowerCase()} goal to create a practical week of meals and workouts.

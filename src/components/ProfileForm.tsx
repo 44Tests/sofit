@@ -9,6 +9,7 @@ import {
   type Sex,
   validateProfile,
 } from "../lib/profile";
+import { BrandLogo } from "./BrandLogo";
 
 type ProfileFormProps = {
   initialProfile?: Profile;
@@ -74,7 +75,7 @@ export function ProfileForm({
   return (
     <main className="app-shell center-shell">
       <form className="panel profile-form" onSubmit={handleSubmit}>
-        <p className="eyebrow">sofit</p>
+        <BrandLogo />
         <h1>{title}</h1>
         <p className="lede">These help keep the notes personal. You can adjust them later.</p>
 

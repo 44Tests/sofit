@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
+import { BrandLogo } from "./components/BrandLogo";
 import { GoalPicker } from "./components/GoalPicker";
 import { GeneratePlanScreen } from "./components/GeneratePlanScreen";
 import { PlanScreen } from "./components/PlanScreen";
@@ -238,7 +239,7 @@ function LoadError({
   return (
     <main className="app-shell center-shell">
       <section className="panel setup-panel">
-        <p className="eyebrow">sofit</p>
+        <BrandLogo />
         <h1>Plan did not load</h1>
         <p className="lede">{message}</p>
         <div className="note">
