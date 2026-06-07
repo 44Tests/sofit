@@ -1,6 +1,6 @@
 const admin = require("firebase-admin");
 const { defineSecret } = require("firebase-functions/params");
-const { HttpsError, onCall } = require("firebase-functions/v2/https");
+const { onRequest } = require("firebase-functions/v2/https");
 
 admin.initializeApp();
 
@@ -93,26 +93,54 @@ const planSchema = {
   },
 };
 
-exports.generatePersonalPlan = onCall(
+exports.generatePersonalPlanHttp = onRequest(
   {
     region: "us-central1",
-    cors: true,
     invoker: "public",
     timeoutSeconds: 60,
     memory: "512MiB",
     secrets: [OPENAI_API_KEY],
   },
-  async (request) => {
-    if (!request.auth) {
-      throw new HttpsError("unauthenticated", "Sign in before generating a plan.");
+  async (request, response) => {
+    applyCors(request, response);
+
+    if (request.method === "OPTIONS") {
+      response.status(204).send("");
+      return;
     }
 
-    const { profile, goal } = request.data || {};
-    if (!isValidProfile(profile) || typeof goal !== "string") {
-      throw new HttpsError("invalid-argument", "Profile and goal are required.");
+    if (request.method !== "POST") {
+      response.status(405).json({ error: "Method not allowed." });
+      return;
     }
 
-    const uid = request.auth.uid;
+    try {
+      const authHeader = request.get("authorization") || "";
+      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+
+      if (!token) {
+        response.status(401).json({ error: "Sign in before generating a plan." });
+        return;
+      }
+
+      const decoded = await admin.auth().verifyIdToken(token);
+      const { profile, goal } = request.body || {};
+
+      if (!isValidProfile(profile) || typeof goal !== "string") {
+        response.status(400).json({ error: "Profile and goal are required." });
+        return;
+      }
+
+      const plan = await createAndSavePlan(decoded.uid, profile, goal);
+      response.status(200).json(plan);
+    } catch (error) {
+      console.error(error);
+      response.status(500).json({ error: error.message || "Could not generate the plan yet." });
+    }
+  },
+);
+
+async function createAndSavePlan(uid, profile, goal) {
     const userRef = admin.firestore().doc(`users/${uid}`);
     const snapshot = await userRef.get();
     const current = snapshot.exists ? snapshot.data() : {};
@@ -120,7 +148,7 @@ exports.generatePersonalPlan = onCall(
     const lastGeneratedAt = current.lastPlanGeneratedAt?.toMillis?.() || 0;
 
     if (lastGeneratedAt && now - lastGeneratedAt < 60 * 1000) {
-      throw new HttpsError("resource-exhausted", "Please wait a moment before generating another plan.");
+    throw new Error("Please wait a moment before generating another plan.");
     }
 
     const bmi = profile.weightKg / (profile.heightCm / 100) ** 2;
@@ -151,7 +179,7 @@ exports.generatePersonalPlan = onCall(
 
     if (!response.ok) {
       const detail = await response.text();
-      throw new HttpsError("internal", `OpenAI plan generation failed: ${detail.slice(0, 240)}`);
+    throw new Error(`OpenAI plan generation failed: ${detail.slice(0, 240)}`);
     }
 
     const data = await response.json();
@@ -160,7 +188,7 @@ exports.generatePersonalPlan = onCall(
     const serialized = JSON.stringify(generatedPlan).toLowerCase();
 
     if (serialized.includes("beef") || serialized.includes("pork")) {
-      throw new HttpsError("internal", "Generated plan violated the no beef/no pork rule. Please try again.");
+    throw new Error("Generated plan violated the no beef/no pork rule. Please try again.");
     }
 
     const planWithTimestamp = {
@@ -180,8 +208,28 @@ exports.generatePersonalPlan = onCall(
     );
 
     return planWithTimestamp;
-  },
-);
+}
+
+function applyCors(request, response) {
+  const origin = request.get("origin") || "";
+  const allowedOrigin = getAllowedOrigin(origin);
+
+  if (allowedOrigin) {
+    response.set("Access-Control-Allow-Origin", allowedOrigin);
+    response.set("Vary", "Origin");
+  }
+
+  response.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  response.set("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  response.set("Access-Control-Max-Age", "3600");
+}
+
+function getAllowedOrigin(origin) {
+  if (!origin) return "*";
+  if (origin.startsWith("http://127.0.0.1:") || origin.startsWith("http://localhost:")) return origin;
+  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) return origin;
+  return "";
+}
 
 function buildPrompt(profile, goal, bmi) {
   return `

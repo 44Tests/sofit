@@ -20,7 +20,6 @@ import {
   type Firestore,
   type Unsubscribe,
 } from "firebase/firestore";
-import { getFunctions, httpsCallable, type Functions } from "firebase/functions";
 import type { PersonalPlan } from "./personalPlan";
 import type { GoalKey } from "./plans";
 import type { Profile } from "./profile";
@@ -49,7 +48,6 @@ type FirebaseServices = {
   app: FirebaseApp;
   auth: Auth;
   db: Firestore;
-  functions: Functions;
   provider: GoogleAuthProvider;
 };
 
@@ -64,11 +62,10 @@ export function getFirebaseServices() {
   const db = initializeFirestore(app, {
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
   });
-  const functions = getFunctions(app);
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
 
-  services = { app, auth, db, functions, provider };
+  services = { app, auth, db, provider };
   return services;
 }
 
@@ -142,11 +139,22 @@ export function toggleDoneDate(uid: string, date: string, isDone: boolean) {
 export async function generatePersonalPlan(profile: Profile, goal: GoalKey) {
   const current = getFirebaseServices();
   if (!current) throw new Error("Firebase config is missing.");
+  if (!current.auth.currentUser) throw new Error("Sign in before generating a plan.");
 
-  const callable = httpsCallable<{ profile: Profile; goal: GoalKey }, PersonalPlan>(
-    current.functions,
-    "generatePersonalPlan",
-  );
-  const result = await callable({ profile, goal });
-  return result.data;
+  const token = await current.auth.currentUser.getIdToken();
+  const response = await fetch(`https://us-central1-${firebaseConfig.projectId}.cloudfunctions.net/generatePersonalPlanHttp`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ profile, goal }),
+  });
+  const data = (await response.json()) as PersonalPlan | { error?: string };
+
+  if (!response.ok) {
+    throw new Error("error" in data && data.error ? data.error : "Could not generate the plan yet.");
+  }
+
+  return data as PersonalPlan;
 }
